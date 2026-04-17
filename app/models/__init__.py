@@ -1,0 +1,1 @@
+import app.models  # guarantees all models are registered
