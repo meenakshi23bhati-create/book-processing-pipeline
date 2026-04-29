@@ -9,3 +9,4 @@ class Book(Base):
     total_pages     = Column(Integer)
     status          = Column(String(50),default="pending") # pending/processing/done
     json_path       = Column(String(500))
+    meta_data       = Column(JSON) 

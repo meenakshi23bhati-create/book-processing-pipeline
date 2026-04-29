@@ -1,0 +1,43 @@
+id,book_id,question,answer,created_at
+17,2,"""Which factors most affect cryptocurrency prices?""","According to the given context, the key drivers that affect Bitcoin prices include:
+
+1. Regulatory changes
+2. Technological advancements 
+
+These are the factors mentioned in the context as influencing cryptocurrency (specifically Bitcoin) prices.",2026-04-27 08:02:55.522486
+16,2,"""What is the relationship between Bitcoin price and market volume?""","The context does not provide a direct answer to the relationship between Bitcoin price and market volume. It discusses various factors affecting Bitcoin price prediction, such as market volatility, sentiment data, and wash trading, but does not specifically address the relationship between Bitcoin price and market volume.",2026-04-27 08:02:25.020315
+15,2, give me all key words ?,"The key words are: 
+1. Bitcoin
+2. Cryptocurrency
+3. Price Prediction
+4. Quantitative Analysis
+5. Market Volatility.",2026-04-27 08:01:34.167022
+14,2,give me all key words ?,"By analyzing historical data and market dynamics, the study identifies key drivers such as regulatory changes, technological advancements, and investor sentiment",2026-04-27 07:42:58.984784
+13,2,give me all key words?,"The key words are: 
+1. Bitcoin
+2. Cryptocurrency
+3. Price Prediction
+4. Quantitative Analysis
+5. Market Volatility.",2026-04-27 06:26:39.06095
+12,2,"""What conclusions did the author draw?""","The author drew the following conclusions: 
+
+1. The study provides a comprehensive review of Bitcoin price prediction from multiple perspectives, including market factors, predictive methodologies, existing limitations, and future opportunities.
+2. The author identifies key drivers of Bitcoin price, such as regulatory changes and technological advancements.
+3. The study suggests that advanced adaptive dynamic models can further enhance the predictive power of Bitcoin price prediction models.
+4. Future research should focus on developing more advanced models and exploring their potential applications in Bitcoin price prediction.
+5. Efforts should be made to establish more robust model validation and testing techniques to ensure the reliability and accuracy of these models.",2026-04-27 06:22:06.443533
+11,2,"""Give me a brief summary""","The study analyzes Bitcoin's price and future forecast using market factors and quantitative models. It discusses Bitcoin's impact on the financial landscape, its decentralized nature, and its influence on global investment strategies. The study also references various research papers on Bitcoin, including its relationship with gold and the dollar, its volatility, and its Sharpe ratio. Additionally, it touches on the challenges of analyzing Bitcoin's price, such as data discrepancies and ""wash trading"" on unregulated exchanges.",2026-04-27 06:21:12.923087
+10,2,"""What is this book about?""","This book, titled ""Bitcoin Price Analysis and Future Forecast: A Study Based on Market Factors and Quantitative Models"", is about analyzing and predicting the price of Bitcoin using various market factors and quantitative models. It explores the relationship between Bitcoin and other financial assets, such as gold and the US dollar, and examines the impact of social media and other factors on Bitcoin's price. The book also discusses the challenges and limitations of Bitcoin price prediction, including issues with data reliability and the presence of ""wash trading"" on unregulated exchanges. Overall, the book provides a comprehensive review of Bitcoin price prediction from multiple perspectives, with a focus on developing more advanced and accurate predictive models.",2026-04-27 06:19:34.601173
+9,2,give me four key words?,"The four key words are: 
+1. Bitcoin
+2. Cryptocurrency
+3. Price Prediction
+4. Quantitative Analysis",2026-04-27 06:17:29.25274
+8,2,give me four key words?,"By analyzing historical data and market dynamics, the study identifies key drivers such as regulatory changes, technological advancements, and investor sentiment",2026-04-27 06:10:40.254148
+7,2,give me four key words?,"By analyzing historical data and market dynamics, the study identifies key drivers such as regulatory changes, technological advancements, and investor sentiment",2026-04-27 06:05:08.625542
+6,2,give me four key words?,"By analyzing historical data and market dynamics, the study identifies key drivers such as regulatory changes, technological advancements, and investor sentiment",2026-04-27 06:02:14.976724
+5,2,all types of key words?,"Journal of Finance, 74(2), 683-734",2026-04-27 05:51:30.251241
+4,2,give me four key woards?,ICDSE2025-TheInternationalConferenceonDataScienceandEngineering Reuters,2026-04-27 05:28:04.386387
+3,2,give me four keywords?,ICDSE2025-TheInternationalConferenceonDataScienceandEngineering Reuters,2026-04-27 05:24:30.447179
+2,2,any four Key words? ,683-734,2026-04-27 04:47:01.949016
+1,2,Any four keywords?,ICDSE2025-TheInternationalConferenceonDataScienceandEngineering Reuters,2026-04-27 04:46:25.966961

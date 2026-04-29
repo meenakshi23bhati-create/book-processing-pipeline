@@ -12,5 +12,5 @@ class Chunk(Base):
     end_page        = Column(Integer)
     row_text        = Column(Text)
     summary         = Column(Text)
-    embedding       = Column(Vector(1536))     # OpenAI ada-002 dimension
+    embedding       = Column(Vector(768 ))     # OpenAI ada-002 dimension  384 huggingface
     meta_data       = Column(JSON)

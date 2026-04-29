@@ -1,0 +1,900 @@
+provider 			Model					   Status
+Provider1		Local BAAI/bge-base-en-v1.5			Kaam karta hai
+provider2		Groq llama-3.3-70b				kaam karta hai 
+
+
+"Hum RAG architecture use karte hain — pehle book ke relevant chunks vector similarity se retrieve karte hain, phir un chunks ko context ki tarah LLM ko dete hain jo final answer generate karta hai. Is approach mein 2 providers hain — Local embedding model aur Groq Cloud LLM."
+
+
+Architecture Diagram
+
+================================================================
+   BOOK PROCESSING PIPELINE — FINAL ARCHITECTURE & PROVIDERS
+================================================================
+
+                        +----------+
+                        |   USER   |
+                        +----------+
+                             |
+                             v
+                    +----------------+
+                    |   FRONTEND     |
+                    |  React App.js  |
+                    +----------------+
+                             |
+                          POST /chat
+                             |
+                             v
+                    +----------------+
+                    | FASTAPI BACKEND|
+                    |    chat.py     |
+                    +----------------+
+                             |
+                             v
+                    +----------------+
+                    |  CHAT SERVICE  |
+                    |chat_service.py |
+                    +-------+--------+
+                            |
+           +----------------+----------------+
+           |                |                |
+           v                v                v
+  +----------------+  +----------+  +----------------+
+  |  PROVIDER 1    |  | pgvector |  |  PROVIDER 2    |
+  |    LOCAL       |  |    DB    |  |  GROQ CLOUD    |
+  | BAAI/bge-base  |  |  Search  |  | llama-3.3-70b  |
+  | en-v1.5 (768d) |  |          |  |   versatile    |
+  +----------------+  +----------+  +----------------+
+           |                |                |
+           +----------------+----------------+
+                            |
+                   +----------------+
+                   | RESPONSE BUILD |
+                   | answer+sources |
+                   +-------+--------+
+                           |
+              +------------+------------+
+              |                         |
+              v                         v
+     +----------------+         +----------+
+     |  CHAT HISTORY  |         |   USER   |
+     |  PostgreSQL    |         | RESPONSE |
+     +----------------+         +----------+
+
+================================================================
+PROVIDERS DETAIL:
+----------------------------------------------------------------
+Provider 1 — EMBEDDING (Local):
+  Model    : BAAI/bge-base-en-v1.5
+  Type     : SentenceTransformer (local)
+  Dims     : 768
+  Speed    : Fast (no API call)
+  Cost     : Free
+
+Provider 2 — LLM ANSWER (Cloud):
+  Model    : llama-3.3-70b-versatile
+  Provider : Groq API
+  Type     : Cloud LLM
+  Speed    : ~1-2 seconds
+  Cost     : Free tier
+
+DATABASE:
+  Type     : PostgreSQL + pgvector
+  Search   : Vector similarity + keyword hybrid
+
+BACKEND:
+  Framework: FastAPI (Python)
+  File     : app/service/chat_service.py
+
+FRONTEND:
+  Framework: React
+  File     : frontend/src/App.js
+================================================================
+
+Data Retrieval Method — RAG (Retrieval Augmented Generation)
+
+Step by step :
+1. Query aati hai      	Kya hota hai: 	User question type karta hai   	Technology:	Frontend React
+2. Embedding banta hai  Kya hota hai:	Query → 768-dim vector   	Technology:   	Local BAAI/bge-base-en-v1.5
+3. Vector search     	Kya hota hai:  	Similar chunks dhundho      	Technology: 	pgvector cosine similarity
+4. Keyword search       Kya hota hai:   Exact word match               	Technology:   	PostgreSQL ILIKE
+5. Hybrid merge		Kya hota hai:	Dono results combine		Technology:	Deduplication logic
+6. Memory check		Kya hota hai:	Book start/middle/end		Technology:	get_book_memory()
+7. History search	Kya hota hai:	Pehle pooche questions          Technology:     chat_history table
+8. Context build	Kya hota hai:	Top 3 chunks select		Technology:  	Max 2000 chars
+9. LLM answer		Kya hota hai:	Answer generate			Technology: 	Groq llama-3.3-70b
+10. Save		Kya hota hai:	Q&A history save		Technology: 	PostgreSQL
+
+
+
+BOOK2- Automating Customer Service using LangChain
+question and Answer
+1. give me all keywords ?
+-> Here are the keywords extracted from the given context: 1. LLMs (Large Language Models) 2. LangChain 3. Gradio 4. APIs 5. Web deployment 6. Information retrieval 7. Human knowledge 8. Data collection 9. Web scraping 10. BeautifulSoup 11. Customer service 12. Customer retention 13. Customer value 14. Brand image 15. Chatbots 16. Conversational User Interfaces (CUI) 17. Model performances 18. Metrics 19. Flan-T5-XXL 20. Google Additionally, some organization and location-based keywords: 1. BVM (Birla Vishvakarma Mahavidyalaya) 2. Vallabh Vidyanagar 3. Gujarat And some general keywords: 1. Machine learning 2. Natural Language Processing (NLP) 3. Artificial Intelligence (AI) 4. Web development 5. User experience 6. Motivation 7. Personalized support 8. Responsive support
+📄 Sources: Pages 2-2 (0.535) | Pages 4-4 (0.524) | Pages 3-3 (0.517) | Pages 1-1 (0.505) ⏱️ 8.29s
+2.what is BVM?
+-> BVM stands for Birla Vishvakarma Mahavidyalaya, which is located in Vallabh Vidyanagar, Gujarat, India. It is an educational institution.
+📄 Sources: Pages 3-3 (0.63) | Pages 1-1 (0.492) | Pages 2-2 (0.429) | Pages 4-4 (0.428) ⏱️ 3.95s
+3. who is Keivalya Pandya ?
+-> Keivalya Pandya is a student at Birla Vishvakarma Mahavidyalaya (BVM), with the email address 19me439@bvmengineering.ac.in, and is a co-author of the research paper on automating customer service using LangChain.
+📄 Sources: Pages 3-3 (0.4) | Pages 1-1 (0.374) | Pages 4-4 (0.347) | Pages 2-2 (0.328) ⏱️ 1.29s
+4. tell me somthing about book?
+-> There is no information about a book in the given context. The context appears to be a research paper or academic article about automating customer service using Large Language Models, specifically LangChain.
+📄 Sources: Pages 3-3 (0.459) | Pages 1-1 (0.433) | Pages 4-4 (0.429) | Pages 2-2 (0.416) ⏱️ 1.47s
+
+
+
+
+BOOK- Government of Kerala(book5)
+1. What is this book about?
+->This is not a book, but rather a collection of government forms from the state of Kerala, specifically templates for a Non-Creamy Layer Certificate (Annexure IX) and an Income Certificate (Annexure XI), used for educational purposes.
+📄 Sources: Pages 48-48 (0.508) | Pages 59-59 (0.501) | Pages 50-50 (0.48) | Pages 54-54 (0.474) | Pages 4-4 (0.472) | Pages 12-12 (0.469) ⏱️ 8.79s
+2. What are the main topics?
+-> The main topics are: 1. Entrance Examinations 2. Institutions and Seats 3. Non-Creamy Layer Certificate 4. Community Certificate 5. Income Certificate 6. Backward Classes (SEBC) 7. Process (CAP) 8. Question palette and Navigation Panel 9. Village Office Income Certificate.
+📄 Sources: Pages 4-4 (0.551) | Pages 59-59 (0.55) | Pages 50-50 (0.523) | Pages 2-2 (0.505) | Pages 3-3 (0.505) | Pages 25-25 (0.501) ⏱️ 1.21s
+3. INFORMATION AT A GLANCE how many points are there ?
+-> There are 7 points: I. Entrance Examinations Institutions and Seats II. Non-Creamy Layer Certificate III. Community Certificate IV(a). Income Certificate IV(b). V. Backward Classes (SEBC) VI. Process (CAP) VII(a) & VII(b).
+📄 Sources: Pages 59-59 (0.588) | Pages 50-50 (0.565) | Pages 4-4 (0.539) | Pages 38-38 (0.53) | Pages 2-2 (0.525) | Pages 57-57 (0.517) ⏱️ 1.23s
+
+4. Give me a summary in 5 points
+-> Here is a summary in 5 points based on the given context: 1. The document appears to be a certificate of income issued by the Village Office of the Government of Kerala. 2. The certificate contains details such as the name, gender, age, and address of the person to whom it is issued. 3. The certificate also mentions the annual family income of the person from all sources. 4. The context also mentions a question palette and navigation panel, which seems to be related to an online examination system. 5. The question palette displays the status of questions, such as answered, unanswered, marked for review, and answered and marked for review, using different colors like green, white, orange, and purple.
+📄 Sources: Pages 50-50 (0.562) | Pages 4-4 (0.528) | Pages 59-59 (0.526) | Pages 54-54 (0.525) | Pages 2-2 (0.518) | Pages 49-49 (0.514) ⏱️ 8.92s
+5 What are the main topics?
+-> The main topics are: 1. Entrance Examinations 2. Institutions and Seats 3. Non-Creamy Layer Certificate 4. Community Certificate 5. Income Certificate 6. Backward Classes (SEBC) 7. Process (CAP) 8. Question palette and Navigation Panel 9. Village Office Income Certificate.
+📄 Sources: Pages 4-4 (0.551) | Pages 59-59 (0.55) | Pages 50-50 (0.523) | Pages 2-2 (0.505) | Pages 3-3 (0.505) | Pages 25-25 (0.501) ⏱️ 0.94s
+
+
+
+"Demonstrating Epistemic and Structural Self-Awareness
+
+1 What is this book about?
+->This text is not about a book, but rather a research paper titled "Demonstrating Epistemic and Structural Self-Awareness in a LangGraph-Based Conversational Agent". It discusses the capabilities of a conversational agent named Bob, specifically its ability to respond to changes in a situation and provide advice based on the latest information, as well as its self-awareness and ability to reflect on its own knowledge and code structure.
+📄 Sources: Pages 5-5 (0.53) | Pages 7-7 (0.508) | Pages 1-1 (0.504) | Pages 8-8 (0.477) | Pages 6-6 (0.474) | Pages 4-4 (0.456) ⏱️ 1.67s
+2. What is Epistemic Self-Awareness?
+-> Epistemic Self-Awareness refers to the ability to monitor and reflect on one's own knowledge state, detecting when inference is needed. In other words, it is the ability of a system to be aware of its own knowledge and limitations, allowing it to recognize when it needs to update or modify its understanding of a situation.
+📄 Sources: Pages 1-1 (0.717) | Pages 2-2 (0.711) | Pages 5-5 (0.632) | Pages 3-3 (0.626) | Pages 8-8 (0.556) | Pages 6-6 (0.535) ⏱️ 1.22s
+3. What is Structural Self-Awareness?
+-> The context does not provide a direct definition of Structural Self-Awareness. However, it mentions that the conversational agent "Bob" combines three complementary self-awareness capabilities, including Epistemic self-awareness and implies the presence of Structural self-awareness, but does not explicitly define it. It does mention "structural code self-awareness" in the context of leveraging modern LLMs and LangGraph, suggesting that Structural Self-Awareness may relate to the agent's ability to introspect and understand its own code or architecture.
+📄 Sources: Pages 1-1 (0.7) | Pages 2-2 (0.697) | Pages 3-3 (0.595) | Pages 5-5 (0.577) | Pages 6-6 (0.555) | Pages 8-8 (0.508) ⏱️ 1.18s
+4. What are the main findings?
+-> The main findings are that Bob's system demonstrates temporal awareness, epistemic self-awareness, and exception handling capabilities. Specifically, it can: 1. Respond to changes in a situation and provide advice based on the latest information. 2. Understand the recency of events and suggest follow-ups accordingly. 3. Capture and handle errors, formatting stack traces and error messages into meta messages for analysis and solution suggestion. 4. Anchor facts and events in time, allowing for better understanding and summarization of dialogues.
+📄 Sources: Pages 5-5 (0.583) | Pages 6-6 (0.525) | Pages 8-8 (0.514) | Pages 7-7 (0.511) | Pages 4-4 (0.476) | Pages 1-1 (0.474) ⏱️ 1.4s
+5. What methodology was used?
+-> The methodology used includes qualitative demonstrations of system behavior in representative scenarios, such as a conversation with Bob about a car problem, and testing Bob on a toy logic scenario. Additionally, the implementation involves a modern LLM (GPT-4) based agent, and the codebase includes files such as basic_agent.py and chroma_db_manager.py. The experiments are also backed by research papers, including "Narrate dialogues for better summarization" and "Large language models can learn temporal reasoning".
+📄 Sources: Pages 5-5 (0.6) | Pages 7-7 (0.577) | Pages 8-8 (0.532) | Pages 6-6 (0.529) | Pages 4-4 (0.528) | Pages 2-2 (0.505) ⏱️ 1.24s
+6. Who are the authors?
+-> The authors mentioned in the context are: 1. Ruochen Xu 2. Chenguang Zhu 3. Michael Zeng 4. Siheng Xiong 5. Ali Payani 6. Ramana Kompella 7. Faramarz Fekri 8. Nate Soares 9. Benja Fallenstein 10. Eliezer Yudkowsky 11. Stuart Armstrong 12. Xunjian Yin 13. Xinyi Wang 14. Liangming Pan 15. Li Lin 16. Xiaojun Wan 17. William Yang Wang 18. Ryan Mukai 19. Al Herrera
+📄 Sources: Pages 8-8 (0.519) | Pages 1-1 (0.496) | Pages 7-7 (0.483) | Pages 5-5 (0.471) | Pages 4-4 (0.44) | Pages 2-2 (0.438) ⏱️ 1.06s
+8. What is the conclusion?
+-> The conclusion is not explicitly stated in the given context. The context appears to be a passage from a research paper discussing the capabilities of a system, specifically a modern LLM (GPT-4) based agent named Bob, in terms of temporal awareness and epistemic self-awareness. It highlights the system's ability to respond to changes and maintain a comprehensive context, but it does not provide a clear conclusion.
+📄 Sources: Pages 5-5 (0.63) | Pages 7-7 (0.558) | Pages 8-8 (0.554) | Pages 1-1 (0.531) | Pages 6-6 (0.528) | Pages 4-4 (0.517) ⏱️ 1.24s
+9. Give me a summary in 5 points
+-> Here is a summary in 5 points: 1. The system, Bob, has a timestamping mechanism that allows it to respond to changes in the situation. 2. Bob's temporal awareness enables it to provide advice based on the latest information, as demonstrated in a conversation about a car problem. 3. The system's capabilities are highlighted through qualitative demonstrations in representative scenarios, rather than formal benchmarking. 4. The research draws on various sources, including papers on temporal reasoning, corrigibility, and self-referential agents. 5. The implementation shows that a modern language model (LLM) based agent can reflect on its own response, code structure, and memory, with publicly available code and transcripts.
+
+
+hugging face se provider 
+steop1-  Pehle local model tha (kaam kar raha tha)
+
+BAAI/bge-base-en-v1.5 → 768 dimensions → DB mein save
+
+step2- HuggingFace API try ki
+hugging face se embedding gentate par error kyu es ke liye free api key nahi hai
+BAAI/bge-base-en-v1.5 → HF free tier pe available nahi → 404 worng
+Step 3 — Dusra HF model try kiya
+
+
+function :-
+def get_hf_embedding(text_input: str) -> list:
+    """Provider 1: HuggingFace API — BAAI/bge-base-en-v1.5"""
+    try:
+        response = requests.post(
+            "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction",
+            headers={"Authorization": f"Bearer {settings.HF_API_KEY}"},
+            json={"inputs": text_input, "options": {"wait_for_model": True}},
+            timeout=60
+        )
+        if response.status_code == 200:
+            embedding = response.json()
+            if isinstance(embedding[0], list):
+                embedding = embedding[0]
+            print(f"✅ HF Embedding done! (dims: {len(embedding)})")
+            return embedding
+        else:
+            raise Exception(f"HF failed: {response.status_code} — {response.text}")
+    except Exception as e:
+        print(f"⚠️ HF failed — fallback to Groq: {e}")
+        raise   
+
+output : clear or sahi nahi aaya …
+es liye 
+Provider 1: Local BAAI/bge-base-en-v1.5 embedding"
+
+
+
+Model- Z.ai API se kiya 
+kararn-Z.ai API call → model: "embedding-2" → 400 Error 
+               "Unknown Model"
+embedding-3 same problem 
+ print("✅ Z.ai API  Embedding ready! (BAAI/bge-base-en-v1.5)")
+ def get_hf_embedding(text_input: str) -> list:
+     """Z.ai API se embedding generate karo"""
+     try:
+         response = requests.post(
+             "https://open.bigmodel.cn/api/paas/v4/embeddings",
+             headers={
+                 "Authorization": f"Bearer {settings.Z_API_KEY}",
+                 "Content-Type": "application/json"
+             },
+             json={
+                 "model": "embedding-2",
+                 "input": text_input
+             },
+             timeout=30
+         )
+         if response.status_code == 200:
+             embedding = response.json()["data"][0]["embedding"]
+             print(f"✅ Z.ai Embedding generated! (dims: {len(embedding)})")
+             return embedding
+         else:
+             raise Exception(f"Z.ai Embedding failed: {response.status_code} — {response.text}")
+     except Exception as e:
+         print(f"❌ Z.ai Embedding error: {e}")
+         raise
+
+
+
+ local embdding with huging face api key 
+ import time
+ from sqlalchemy import create_engine, text
+ from sqlalchemy.orm import Session
+ from sentence_transformers import SentenceTransformer
+ from app.core.config import settings
+ from app.models.chat_history import ChatHistory
+ import requests
+
+ ✅ Embedding model — local
+ print("🤖 Embedding model load ho raha hai...")
+ _model = SentenceTransformer('BAAI/bge-base-en-v1.5')
+ print("✅ Embedding model ready! (BAAI/bge-base-en-v1.5 — 768 dims)")
+
+
+ def search_similar_chunks(query: str, book_id: int, top_k: int = 10) -> list:
+     """Vector + Keyword hybrid search"""
+     query_embedding = _model.encode(query, normalize_embeddings=True).tolist()
+
+     engine = create_engine(settings.SYNC_DATABASE_URL)
+     with engine.connect() as conn:
+
+          Vector search
+         result = conn.execute(
+             text("""
+                 SELECT 
+                     id, chunk_index, start_page, end_page,
+                     row_text, summary, meta_data,
+                     1 - (embedding <=> CAST(:embedding AS vector)) as similarity
+                 FROM chunks
+                 WHERE book_id = :book_id
+                   AND embedding IS NOT NULL
+                 ORDER BY embedding <=> CAST(:embedding AS vector)
+                 LIMIT :top_k
+             """),
+             {
+                 "embedding": str(query_embedding),
+                 "book_id": book_id,
+                 "top_k": top_k
+             }
+         ).mappings().all()
+         vector_chunks = [dict(r) for r in result]
+
+          Keyword search
+         keywords = [w for w in query.split() if len(w) > 3]
+         keyword = keywords[0] if keywords else query.split()[0]
+
+         keyword_result = conn.execute(
+             text("""
+                 SELECT 
+                     id, chunk_index, start_page, end_page,
+                     row_text, summary, meta_data,
+                     0.5 as similarity
+                 FROM chunks
+                 WHERE book_id = :book_id
+                   AND row_text ILIKE :keyword
+                 LIMIT 5
+             """),
+             {
+                 "book_id": book_id,
+                 "keyword": f"%{keyword}%"
+             }
+         ).mappings().all()
+         keyword_chunks = [dict(r) for r in keyword_result]
+
+          Combine — duplicates hatao
+         seen_ids = set()
+         combined = []
+         for c in vector_chunks + keyword_chunks:
+             if c['id'] not in seen_ids:
+                 seen_ids.add(c['id'])
+                 combined.append(c)
+
+     print(f"✅ {len(combined)} chunks mile! (vector: {len(vector_chunks)}, keyword: {len(keyword_chunks)})")
+     return combined[:top_k]
+
+
+ def get_similar_past_questions(query: str, book_id: int, top_k: int = 3) -> list:
+     """Pehle pooche gaye similar questions dhundho"""
+     try:
+         query_embedding = _model.encode(query, normalize_embeddings=True).tolist()
+         engine = create_engine(settings.SYNC_DATABASE_URL)
+         with engine.connect() as conn:
+             result = conn.execute(
+                 text("""
+                     SELECT
+                         question, answer,
+                         1 - (q_embedding <=> CAST(:embedding AS vector)) as similarity,
+                         created_at
+                     FROM chat_history
+                     WHERE book_id = :book_id
+                     ORDER BY q_embedding <=> CAST(:embedding AS vector)
+                     LIMIT :top_k
+                 """),
+                 {
+                     "embedding": str(query_embedding),
+                     "book_id": book_id,
+                     "top_k": top_k
+                 }
+             ).mappings().all()
+         return [dict(r) for r in result]     except Exception as e:
+         print(f"[WARN] Similar questions error: {e}")
+         return []
+
+
+ def save_chat_history(book_id: int, question: str, answer: str):
+     """Chat history save karo"""
+     try:
+         q_embedding = _model.encode(question, normalize_embeddings=True).tolist()
+         engine = create_engine(settings.SYNC_DATABASE_URL)
+         with Session(engine) as session:
+             history = ChatHistory(
+                 book_id=book_id,
+                 question=question,
+                 answer=answer,
+                 q_embedding=q_embedding
+             )
+             session.add(history)
+             session.commit()
+         print(f"✅ Chat history saved!")
+     except Exception as e:
+         print(f"[WARN] Chat history save error: {e}")
+
+
+ def get_book_memory(book_id: int) -> dict:
+     """Book ka start, middle, end memory"""
+     engine = create_engine(settings.SYNC_DATABASE_URL)
+     with engine.connect() as conn:
+         total = conn.execute(
+             text("SELECT COUNT(*) FROM chunks WHERE book_id = :bid"),
+             {"bid": book_id}
+         ).scalar()
+
+         if not total:
+             return {"start": None, "middle": None, "end": None, "total_chunks": 0}
+
+         start_chunks = conn.execute(
+             text("""SELECT row_text, start_page, end_page
+                 FROM chunks WHERE book_id = :bid
+                 ORDER BY chunk_index ASC LIMIT 2"""),
+             {"bid": book_id}
+         ).mappings().all()
+
+         mid = total // 2
+         middle_chunks = conn.execute(
+             text("""SELECT row_text, start_page, end_page
+                 FROM chunks WHERE book_id = :bid
+                 ORDER BY chunk_index ASC
+                 LIMIT 2 OFFSET :offset"""),
+             {"bid": book_id, "offset": mid}
+         ).mappings().all()
+
+         end_chunks = conn.execute(
+             text("""SELECT row_text, start_page, end_page
+                 FROM chunks WHERE book_id = :bid
+                 ORDER BY chunk_index DESC LIMIT 2"""),
+             {"bid": book_id}
+         ).mappings().all()
+
+     return {
+         "start": [dict(c) for c in start_chunks],
+         "middle": [dict(c) for c in middle_chunks],
+         "end": [dict(c) for c in end_chunks],
+         "total_chunks": total
+     }
+
+
+ def simple_extractive_answer(query: str, context_chunks: list) -> str:
+     """Simple fallback — context se best matching sentence nikalo"""
+     if not context_chunks:
+         return "Koi relevant information nahi mili."
+
+     query_words = set(query.lower().split())
+     best_sentence = ""
+     best_score = 0
+
+     for chunk in context_chunks[:3]:
+         sentences = chunk['row_text'].split('.')
+         for sentence in sentences:
+             sentence = sentence.strip()
+             if len(sentence) < 10:
+                 continue
+             score = len(query_words & set(sentence.lower().split()))
+             if score > best_score:
+                 best_score = score
+                 best_sentence = sentence
+
+     return best_sentence if best_sentence else context_chunks[0]['row_text'][:300]
+
+
+ def generate_answer(query: str, context_chunks: list) -> str:
+     """Groq LLaMA3 se answer generate karo — fallback extractive"""
+     if not context_chunks:
+         return "Koi relevant information nahi mili."
+
+     context = " ".join([c['row_text'][:800] for c in context_chunks[:3]])
+
+     headers = {
+         "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+         "Content-Type": "application/json"
+     }
+
+     payload = {
+         "model": "llama-3.3-70b-versatile",
+         "messages": [
+             {
+                 "role": "system",
+                 "content": "You are a helpful assistant. Answer questions based on the given context only. Be concise and accurate."
+             },
+             {
+                 "role": "user",
+                 "content": f"You are a helpful assistant. Answer questions based on the given context only.\n\nContext: {context[:2000]}\n\nQuestion: {query}\n\nAnswer clearly and completely."
+             },
+                        
+         ],
+         "temperature": 0.3,
+         "max_tokens": 1024
+     }
+
+     try:
+         print(f"🤖 Groq LLaMA3 API call...")
+         start = time.time()
+         response = requests.post(
+             "https://api.groq.com/openai/v1/chat/completions",
+             headers=headers,
+             json=payload,
+             timeout=30
+         )
+         elapsed = time.time() - start
+         print(f"Status: {response.status_code} ({elapsed:.2f}s)")
+
+         if response.status_code == 200:
+             result = response.json()
+             answer = result['choices'][0]['message']['content'].strip()
+             print(f"✅ Groq answer: {answer[:500]}")
+             return answer
+
+         print(f"⚠️ Groq failed (status {response.status_code})")
+         print(f"❌ Groq error response: {response.text}")
+         return simple_extractive_answer(query, context_chunks)
+
+     except Exception as e:
+         print(f"❌ Groq error: {e} — fallback to extractive")
+         return simple_extractive_answer(query, context_chunks)
+
+
+ def chat_with_book(book_id: int, query: str) -> dict:
+     """Main chat function"""
+     start_time = time.time()
+
+     print(f"\n{'='*60}")
+     print(f"📩 USER QUERY  : {query}")
+     print(f"📚 BOOK ID     : {book_id}")
+     print(f"{'='*60}")
+
+      Similar past questions
+     similar_qs = get_similar_past_questions(query, book_id)
+
+      Context chunks search
+     context_chunks = search_similar_chunks(query, book_id)
+
+      Answer generate karo
+     answer = generate_answer(query, context_chunks)
+
+      Sources
+     sources = [
+         {
+             "pages": f"Pages {c['start_page']}-{c['end_page']}",
+             "similarity": round(float(c['similarity']), 3)
+         }
+         for c in context_chunks[:6]
+     ]
+
+      Chat history save
+     save_chat_history(book_id, query, answer)
+
+     total_time = time.time() - start_time
+
+     print(f"\n{'='*60}")
+     print(f"🤖 AI RESPONSE : {answer[:1000]}")
+     print(f"⏱️  TIME TAKEN  : {total_time:.2f}s")
+     print(f"{'='*60}\n")
+
+     return {
+         "answer": answer,
+         "sources": sources,
+         "query": query,
+         "book_id": book_id,
+         "similar_questions": [
+             {
+                 "question": q["question"],
+                 "answer": q["answer"],
+                 "similarity": round(float(q["similarity"]), 3),
+             }
+             for q in similar_qs
+             if float(q["similarity"]) > 0.7
+         ],
+         "time_taken": round(total_time, 2)
+     }
+
+import time
+  from typing import Any
+  from sqlalchemy import create_engine, text
+  from sqlalchemy.orm import Session
+  from sentence_transformers import SentenceTransformer
+  from app.core.config import settings
+  from app.models.chunks import Chunk
+  from app.models.books import Book
+  from app.models.chat_history import ChatHistory
+  import requests
+
+   ✅ Sirf embedding model — local
+  print("🤖 Embedding model load ho raha hai...")
+  _model = SentenceTransformer('BAAI/bge-base-en-v1.5')
+  print("✅ Embedding model ready! (BAAI/bge-base-en-v1.5 — 768 dims)")
+
+
+  def search_similar_chunks(query: str, book_id: int, top_k: int = 10) -> list:
+      """Vector + Keyword hybrid search"""
+      query_embedding = _model.encode(query, normalize_embeddings=True).tolist()
+
+      engine = create_engine(settings.SYNC_DATABASE_URL)
+      with engine.connect() as conn:
+
+           Vector search
+          result = conn.execute(
+              text("""
+                  SELECT 
+                      id, chunk_index, start_page, end_page,
+                      row_text, summary, meta_data,
+                      1 - (embedding <=> CAST(:embedding AS vector)) as similarity
+                  FROM chunks
+                  WHERE book_id = :book_id
+                    AND embedding IS NOT NULL
+                  ORDER BY embedding <=> CAST(:embedding AS vector)
+                  LIMIT :top_k
+              """),
+              {
+                  "embedding": str(query_embedding),
+                  "book_id": book_id,
+                  "top_k": top_k
+              }
+          ).mappings().all()
+          vector_chunks = [dict(r) for r in result]
+
+           Keyword search
+          keywords = [w for w in query.split() if len(w) > 3]
+          keyword = keywords[0] if keywords else query.split()[0]
+
+          keyword_result = conn.execute(
+              text("""
+                  SELECT 
+                      id, chunk_index, start_page, end_page,
+                      row_text, summary, meta_data,
+                      0.5 as similarity
+                  FROM chunks
+                  WHERE book_id = :book_id
+                    AND row_text ILIKE :keyword
+                  LIMIT 5
+              """),
+              {
+                  "book_id": book_id,
+                  "keyword": f"%{keyword}%"
+              }
+          ).mappings().all()
+          keyword_chunks = [dict(r) for r in keyword_result]
+
+           Combine — duplicates hatao
+          seen_ids = set()
+          combined = []
+          for c in vector_chunks + keyword_chunks:
+              if c['id'] not in seen_ids:
+                  seen_ids.add(c['id'])
+                  combined.append(c)
+
+      print(f"✅ {len(combined)} chunks mile! (vector: {len(vector_chunks)}, keyword: {len(keyword_chunks)})")
+      return combined[:top_k]
+
+
+  def get_similar_past_questions(query: str, book_id: int, top_k: int = 3) -> list:
+      """Pehle pooche gaye similar questions dhundho"""
+      try:
+          query_embedding = _model.encode(query, normalize_embeddings=True).tolist()
+          engine = create_engine(settings.SYNC_DATABASE_URL)
+          with engine.connect() as conn:
+              result = conn.execute(
+                  text("""
+                      SELECT
+                          question, answer,
+                          1 - (q_embedding <=> CAST(:embedding AS vector)) as similarity,
+                          created_at
+                      FROM chat_history
+                      WHERE book_id = :book_id
+                      ORDER BY q_embedding <=> CAST(:embedding AS vector)
+                      LIMIT :top_k
+                  """),
+                  {
+                      "embedding": str(query_embedding),
+                      "book_id": book_id,
+                      "top_k": top_k
+                  }
+              ).mappings().all()
+          return [dict(r) for r in result]
+      except Exception as e:
+          print(f"[WARN] Similar questions error: {e}")
+          return []
+
+
+  def save_chat_history(book_id: int, question: str, answer: str):
+      """Chat history vector DB mein save karo"""
+      try:
+          q_embedding = _model.encode(question, normalize_embeddings=True).tolist()
+          engine = create_engine(settings.SYNC_DATABASE_URL)
+          with Session(engine) as session:
+              history = ChatHistory(
+                  book_id=book_id,
+                  question=question,
+                  answer=answer,
+                  q_embedding=q_embedding
+              )
+              session.add(history)
+              session.commit()
+          print(f"✅ Chat history saved!")
+      except Exception as e:
+          print(f"[WARN] Chat history save error: {e}")
+
+
+  def get_book_memory(book_id: int) -> dict:
+      """Book ka start, middle, end memory"""
+      engine = create_engine(settings.SYNC_DATABASE_URL)
+      with engine.connect() as conn:
+          total = conn.execute(
+              text("SELECT COUNT(*) FROM chunks WHERE book_id = :bid"),
+              {"bid": book_id}
+          ).scalar()
+
+          if not total:
+              return {"start": None, "middle": None, "end": None, "total_chunks": 0}
+
+          start_chunks = conn.execute(
+              text("""SELECT row_text, start_page, end_page
+                  FROM chunks WHERE book_id = :bid
+                  ORDER BY chunk_index ASC LIMIT 2"""),
+              {"bid": book_id}
+          ).mappings().all()
+
+          mid = total // 2
+          middle_chunks = conn.execute(
+              text("""SELECT row_text, start_page, end_page
+                  FROM chunks WHERE book_id = :bid
+                  ORDER BY chunk_index ASC
+                  LIMIT 2 OFFSET :offset"""),
+              {"bid": book_id, "offset": mid}
+          ).mappings().all()
+
+          end_chunks = conn.execute(
+              text("""SELECT row_text, start_page, end_page
+                  FROM chunks WHERE book_id = :bid
+                  ORDER BY chunk_index DESC LIMIT 2"""),
+              {"bid": book_id}
+          ).mappings().all()
+
+      return {
+          "start": [dict(c) for c in start_chunks],
+          "middle": [dict(c) for c in middle_chunks],
+          "end": [dict(c) for c in end_chunks],
+          "total_chunks": total
+      }
+
+
+  def generate_answer(query: str, context_chunks: list) -> str:
+      if not context_chunks:
+          return "Koi relevant information nahi mili."
+
+      context = " ".join([c['row_text'][:800] for c in context_chunks[:3]])
+
+      headers = {
+          "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+          "Content-Type": "application/json"
+      }
+
+      payload = {
+          "model": "llama3-8b-8192",
+          "messages": [
+              {
+                  "role": "system",
+                  "content": "You are a helpful assistant. Answer questions based on the given context only."
+              },
+              {
+                  "role": "user",
+                  "content": f"Context: {context[:2000]}\n\nQuestion: {query}\n\nAnswer clearly and completely."
+              }
+          ],
+          "temperature": 0.3,
+          "max_tokens": 300
+      }
+
+      try:
+          print(f"🤖 Groq LLaMA3 API call...")
+          start = time.time()
+          response = requests.post(
+              "https://api.groq.com/openai/v1/chat/completions",
+              headers=headers,
+              json=payload,
+              timeout=30
+          )
+          elapsed = time.time() - start
+          print(f"Status: {response.status_code} ({elapsed:.2f}s)")
+
+          if response.status_code == 200:
+              result = response.json()
+              answer = result['choices'][0]['message']['content'].strip()
+              print(f"✅ Groq answer: {answer[:100]}")
+              return answer
+
+          print(f"⚠️ Groq failed — fallback to extractive")
+          return extractive_qa(query, context_chunks)
+
+      except Exception as e:
+          print(f"❌ Groq error: {e}")
+          return extractive_qa(query, context_chunks)
+
+   def generate_answer(query: str, context_chunks: list) -> str:
+       """Mistral-7B se answer generate karo — fallback roberta"""
+       if not context_chunks:
+           return "Koi relevant information nahi mili."
+
+        ✅ Better context
+       context = " ".join([
+           c['row_text'][:800]
+           for c in context_chunks[:3]
+       ])
+
+        ✅ Mistral-7B API
+       API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta"
+       headers = {"Authorization": f"Bearer {settings.HF_API_KEY}"}
+
+       prompt = f"""<s>[INST] Answer the question based on the context below.
+
+   Context: {context[:1500]}
+
+   Question: {query}
+
+   Give a complete and accurate answer. [/INST]"""
+
+       payload = {
+           "inputs": prompt,
+           "parameters": {
+               "max_new_tokens": 200,
+               "temperature": 0.3,
+               "return_full_text": False
+           },
+           "options": {"wait_for_model": True}
+       }
+
+       try:
+           print(f"🤖 Mistral-7B API call...")
+           start = time.time()
+           response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+           elapsed = time.time() - start
+           print(f"Status: {response.status_code} ({elapsed:.2f}s)")
+
+           if response.status_code == 200:
+               result = response.json()
+               if isinstance(result, list) and len(result) > 0:
+                   answer = result[0].get('generated_text', '').strip()
+                   if answer:
+                       print(f"✅ Mistral answer: {answer[:100]}")
+                       return answer
+
+           print(f"⚠️ Mistral failed — fallback to roberta")
+           return extractive_qa(query, context_chunks)
+
+       except Exception as e:
+           print(f"❌ Mistral error: {e}")
+           return extractive_qa(query, context_chunks)
+
+
+   def extractive_qa(query: str, context_chunks: list) -> str:
+       """Fallback — roberta extractive QA"""
+       API_URL = "https://router.huggingface.co/hf-inference/models/deepset/roberta-base-squad2"
+       headers = {"Authorization": f"Bearer {settings.HF_API_KEY}"}
+       context = context_chunks[0]['row_text'][:1000]
+       payload = {
+           "inputs": {"question": query, "context": context},
+           "options": {"wait_for_model": True}
+       }
+       try:
+           response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+           if response.status_code == 200:
+               result = response.json()
+               if result.get("score", 0) > 0.000001:
+                   return result["answer"]
+       except Exception:
+           pass
+       sentences = context_chunks[0]['row_text'].split('.')
+       good = [s.strip() for s in sentences if len(s.strip()) > 30]
+       return good[0] if good else context_chunks[0]['row_text'][:200]
+
+
+  def chat_with_book(book_id: int, query: str) -> dict:
+      """Main chat function"""
+      total_start = time.time()
+      print(f"\n{'='*60}")
+      print(f"📩 USER QUERY  : {query}")
+      print(f"📚 BOOK ID     : {book_id}")
+      print(f"{'='*60}")
+
+      similar_chunks = search_similar_chunks(query, book_id, top_k=10)
+
+      if not similar_chunks:
+          return {
+              "answer": "Is book mein koi relevant information nahi mili.",
+              "sources": [],
+              "query": query,
+              "similar_questions": [],
+              "time_taken": round(time.time() - total_start, 2)
+          }
+
+      similar_qs = get_similar_past_questions(query, book_id, top_k=3)
+      answer = generate_answer(query, similar_chunks)
+      save_chat_history(book_id, query, answer)
+
+      sources = [
+          {
+              "chunk_index": c["chunk_index"],
+              "pages": f"{c['start_page']}-{c['end_page']}",
+              "similarity": round(float(c["similarity"]), 3),
+              "summary": c["summary"][:200] if c["summary"] else "",
+          }
+          for c in similar_chunks
+      ]
+
+      total_time = time.time() - total_start
+      print(f"\n{'='*60}")
+      print(f"🤖 AI RESPONSE : {answer[:150]}")
+      print(f"⏱️  TIME TAKEN  : {total_time:.2f}s")
+      print(f"{'='*60}\n")
+
+      return {
+          "answer": answer,
+          "sources": sources,
+          "query": query,
+          "book_id": book_id,
+          "similar_questions": [
+              {
+                  "question": q["question"],
+                  "answer": q["answer"],
+                  "similarity": round(float(q["similarity"]), 3),
+              }
+              for q in similar_qs
+              if float(q["similarity"]) > 0.7
+          ],
+          "time_taken": round(total_time, 2)
+      }

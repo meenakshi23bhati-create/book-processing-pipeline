@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.env
+*.pdf
+test_pdf.py
+frontend/node_modules/
+frontend/build/
+uploads/

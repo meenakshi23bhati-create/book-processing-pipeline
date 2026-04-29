@@ -42,12 +42,14 @@ def save_chunks_to_json(book_id:int) -> str:
     os.makedirs(settings.OUTPUT_DIR,exist_ok=True)
 
     #file save 
-    timestamp= datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-    filename=f"book_{book_id}_{timestamp}.json"
-    filepath=os.path.join(settings.OUTPUT_DIR,filename)
+    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+    filename = f"book_{book_id}_{timestamp}.json"
+    filepath = os.path.join(settings.OUTPUT_DIR, filename)
 
     with open(filepath,"w",encoding="utf-8") as f:
-          json.dump(output,f,ensure_ascii=False,indent=2)
+          json.dump(output, f, ensure_ascii=False , indent=2)
+    
+    print(f"[✅] JSON saved: {filepath}")
     return filepath
 
 
