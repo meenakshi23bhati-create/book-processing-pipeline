@@ -243,6 +243,52 @@ docker cp postgres_db:/tmp/chat_history.csv ./chat_history_csv/
 
 ---
 
+🤖 RAG Agent (ReAct Architecture)
+Branch feature/rag-agent adds a multi-step reasoning agent on top of the existing RAG pipeline.
+Agent Flow
+User Query
+    ↓
+ReAct Agent Loop (max 5 steps)
+    ↓
+┌─────────────────────────────────────────────┐
+│  Step 1: Check chat history (cached answers)│
+│  Step 2: Vector + keyword chunk search      │
+│  Step 3: Book memory (optional, broad Q)    │
+│  Step N: Produce final_answer               │
+└─────────────────────────────────────────────┘
+    ↓
+Groq LLaMA3-70b — grounded answer generation
+    ↓
+Response: answer + sources + full reasoning trace
+Agent Tools
+ToolDescriptionsearch_chunksVector + keyword hybrid search over book contentget_chat_historyRetrieve semantically similar past Q&A pairsget_book_memoryFetch start / middle / end book excerpts
+New Agent Endpoint
+MethodEndpointDescriptionPOST/agent/chatMulti-step ReAct agent chat
+Request:
+json{
+  "book_id": 1,
+  "query": "What is the main theme of the book?",
+  "max_steps": 5
+}
+Response:
+json{
+  "answer": "The main theme is ...",
+  "sources": [...],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I should first check if this was asked before.",
+      "tool": "get_chat_history",
+      "tool_input": {"query": "main theme"},
+      "observation": "No past questions found.",
+      "elapsed_seconds": 0.4
+    }
+  ],
+  "similar_questions": [...],
+  "total_time": 3.2,
+  "agent_steps_count": 3
+}
+
 ## 📝 License
 
 This project is for educational and research purposes.
