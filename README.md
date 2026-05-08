@@ -181,11 +181,10 @@ What are the conclusions?
 
 ## 🗃️ Database Tables
 
-| Table | Purpose |
-|---|---|
-| `books` | Uploaded books metadata |
-| `chunks` | Book text chunks + embeddings |
-| `chat_history` | Q&A history + embeddings |
+| Table             | Purpose |
+| `books`           | Uploaded books metadata |
+| `chunks`          | Book text chunks + embeddings |
+| `chat_history`     | Q&A history + embeddings |
 
 ---
 
