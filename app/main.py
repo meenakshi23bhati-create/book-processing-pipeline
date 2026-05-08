@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.models import books
 from app.models import chunks
-from app.api.routes import books, chunks,chat
+from app.api.routes import books, chunks,chat,Agent_router
 from app.core.database import Base, init_db,engine
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.chat_history import ChatHistory
@@ -27,6 +27,7 @@ app.add_middleware(
 
 app.include_router(books.router)
 app.include_router(chunks.router)
+app.include_router(Agent_router.router)  
 app.include_router(chat.router, tags=["Chat"])
 
 @app.on_event("startup")
